@@ -29,17 +29,17 @@
       <form action="{% url 'web:estimate' %}" method="post">
         {% csrf_token %}
         <div class="mb-3">
-          <label for="location1" class="form-label">Location:</label>
-          <input type="text" class="form-control" id="location1" aria-describedby="emailHelp" required>
+          <label for="location" class="form-label">Location:</label>
+          <input type="text" class="form-control" id="location" aria-describedby="emailHelp" name="location" required>
         </div>
         <div class="mb-3">
-          <label for="metr1" class="form-label">Metr:</label>
-          <input type="text" class="form-control" id="metr1">
+          <label for="metr" class="form-label">Metr:</label>
+          <input type="text" class="form-control" id="metr" name="metr" required>
         </div>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label for="room1" class="form-label">Number of Rooms:</label>
-            <select type="number" class="form-select" id="room1">
+            <label for="room" class="form-label">Number of Rooms:</label>
+            <select type="number" class="form-select" id="room" name="rooms" required>
               <option value="1">1</option>
               <option value="2">2</option>
               <option value="3">3</option>
@@ -53,8 +53,8 @@
             </select>
           </div>
           <div class="col-md-6 mb-3">
-            <label for="parking1" class="form-label">Number of Parking:</label>
-            <select type="number" class="form-select" id="parking1">
+            <label for="parking" class="form-label">Number of Parking:</label>
+            <select type="number" class="form-select" id="parking" name="parking" required>
               <option value="1">0</option>
               <option value="1">1</option>
               <option value="2">2</option>
@@ -69,10 +69,6 @@
             </select>
           </div>
         </div>
-          <div class="mb-3">
-            <label for="price1" class="form-label">Price:</label>
-            <input type="text" class="form-control" id="price1">
-          </div>
         <button  id="btn_estimate" type="submit" class="btn btn-block btn-info m-5" style="width: 90%; height:50px">
           Search
         </button>
@@ -81,22 +77,12 @@
         <table class="table table-hover table-striped table-responsive">
           <thead>
             <tr>
-              <th scope="col">#</th>
-              <th scope="col">Location</th>
-              <th scope="col">Metr</th>
-              <th scope="col">Rooms</th>
-              <th scope="col">Parking</th>
               <th scope="col">Price</th>
             </tr>
           </thead>
           <tbody>
           <tr>
-            <th scope="row">1</th>
-            <td>Kilid</td>
-            <td>1000</td>
-            <td>aaaa</td>
-            <td>sss</td>
-            <td>dddd</td>
+            <th scope="row"> میلیارد تومان {{price}} </th>
           </tr>
           </tbody>
         </table>

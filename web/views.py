@@ -1,3 +1,6 @@
+import pandas as pd
+
+import numpy as np
 from django.contrib import messages
 from django.http import HttpResponseRedirect, HttpResponse
 from django.shortcuts import render
@@ -5,6 +8,19 @@ from web.forms import house
 from bs4 import BeautifulSoup
 import re
 import requests
+from sklearn import tree
+from sklearn.preprocessing import LabelEncoder
+
+
+def is_numeric(value):
+    try:
+        # تبدیل رشته به عدد اعشاری
+        float_value = float(value)
+        # اگر تبدیل موفقیت‌آمیز بود، برگرداندن True
+        return True
+    except ValueError:
+        # در غیر این صورت، برگرداندن False
+        return False
 
 
 # Create your views here.
@@ -57,7 +73,6 @@ def search(request):
         rooms = request.POST.get('rooms')
         parking = request.POST.get('parking')
         metr = request.POST.get('metr')
-        print(location, rooms, parking, metr, price)
 
         # بررسی اینکه آیا هرکدام از فیلدها خالی نیست
         if location or price or rooms or parking or metr:
@@ -73,10 +88,10 @@ def search(request):
             if metr:
                 filter_args['metr'] = metr
 
-        # انجام مقایسه با اطلاعات موجود در پایگاه داده با استفاده از فیلتر
+            # انجام مقایسه با اطلاعات موجود در پایگاه داده با استفاده از فیلتر
             matched_data = house.objects.filter(**filter_args)
 
-        # ارسال نتایج به قالب
+            # ارسال نتایج به قالب
             return render(request, 'search.html', {'matched_data': matched_data})
         else:
             # اگر هیچ فیلتری مشخص نشده باشد، پیغامی نمایش داده می‌شود
@@ -86,4 +101,35 @@ def search(request):
 
 
 def estimate(request):
-    return render(request, 'estimate.html')
+    if request.method == 'POST':
+        houses = house.objects.all()
+        x = []
+        y = []
+        for h in houses:
+            if is_numeric(h.price):
+                location = h.location
+                if location is not None:
+                    location_dummies = pd.get_dummies(location, drop_first=True)
+                    all_features = np.concatenate((location_dummies.values.flatten(), [h.metr, h.rooms, h.parking]))
+                    x.append(all_features)
+                    y.append(h.price)
+        x = np.array(x)
+        y = np.array(y)
+
+        clf = tree.DecisionTreeClassifier()
+        clf = clf.fit(x, y)
+
+        l = request.POST.get('location')
+        if l is not None:
+            location = pd.get_dummies(l, drop_first=True).values.flatten()
+            rooms = request.POST.get('rooms')
+            parking = request.POST.get('parking')
+            metr = request.POST.get('metr')
+            x1 = np.concatenate((location, [metr, rooms, parking])).reshape(1, -1)
+            y1 = clf.predict(x1)
+            context = {'price': y1[0]}
+            return render(request, 'estimate.html', context)
+        else:
+            return HttpResponse("Invalid input for location")
+    else:
+        return render(request, 'estimate.html')
